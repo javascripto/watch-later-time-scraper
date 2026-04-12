@@ -8,10 +8,20 @@ const LOGGED_IN_SELECTOR = '#avatar-btn';
 const LOGIN_TIMEOUT_MS = 120_000; // 2 minutos para o usuário logar
 
 async function login(): Promise<void> {
-  // Usa o Chrome real instalado no sistema para evitar bloqueio do Google
-  // (o Chromium bundled do Playwright é detectado como bot)
-  const browser = await chromium.launch({ headless: false, channel: 'chrome' });
+  // Usa o Chrome real + mascara indicadores de automação detectados pelo Google
+  const browser = await chromium.launch({
+    headless: false,
+    channel: 'chrome',
+    args: ['--disable-blink-features=AutomationControlled'],
+  });
+
   const context = await browser.newContext();
+
+  // Remove navigator.webdriver que o Google usa para detectar bots
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+  });
+
   const page = await context.newPage();
 
   await page.goto(YOUTUBE_URL);
