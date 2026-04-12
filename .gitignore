@@ -1,3 +1,6 @@
 node_modules/
 dist/
 session.json
+
+watch-later.md
+watch-later.json
