@@ -1,11 +1,11 @@
 import {
-  MILLISECONDS_IN_ONE_DAY,
-  MILLISECONDS_IN_ONE_HOUR,
-  MILLISECONDS_IN_ONE_MINUTE,
-  MILLISECONDS_IN_ONE_SECOND,
-  MILLISECONDS_IN_ONE_WEEK,
-  SECONDS_IN_ONE_HOUR,
-  SECONDS_IN_ONE_MINUTE,
+  ONE_DAY_MS,
+  ONE_HOUR_MS,
+  ONE_HOUR_SEC,
+  ONE_MINUTE_MS,
+  ONE_MINUTE_SEC,
+  ONE_SECOND_MD,
+  ONE_WEEK_MS,
   TIME_PATTERN,
 } from './constants';
 import { padZero, restOfDivision } from './math';
@@ -26,11 +26,12 @@ export class Duration {
     seconds = 0,
     milliseconds = 0,
   }: DurationParams = {}) {
-    this.milliseconds = 0
-      + hours * MILLISECONDS_IN_ONE_HOUR
-      + minutes * MILLISECONDS_IN_ONE_MINUTE
-      + seconds * MILLISECONDS_IN_ONE_SECOND
-      + milliseconds;
+    this.milliseconds =
+      0 +
+      hours * ONE_HOUR_MS +
+      minutes * ONE_MINUTE_MS +
+      seconds * ONE_SECOND_MD +
+      milliseconds;
   }
 
   static fromTimeString(timeString: string): Duration {
@@ -71,42 +72,42 @@ export class Duration {
   }
 
   get inSeconds() {
-    return this.milliseconds / MILLISECONDS_IN_ONE_SECOND;
+    return this.milliseconds / ONE_SECOND_MD;
   }
 
   get inMinutes() {
-    return this.milliseconds / MILLISECONDS_IN_ONE_MINUTE;
+    return this.milliseconds / ONE_MINUTE_MS;
   }
 
   get inHours() {
-    return this.milliseconds / MILLISECONDS_IN_ONE_HOUR;
+    return this.milliseconds / ONE_HOUR_MS;
   }
 
   get inDays() {
-    return this.milliseconds / MILLISECONDS_IN_ONE_DAY;
+    return this.milliseconds / ONE_DAY_MS;
   }
 
   get inWeeks() {
-    return this.milliseconds / MILLISECONDS_IN_ONE_WEEK;
+    return this.milliseconds / ONE_WEEK_MS;
   }
 
   toTimeString() {
     const totalSeconds = Math.abs(this.inSeconds);
-    if (totalSeconds < SECONDS_IN_ONE_MINUTE) {
+    if (totalSeconds < ONE_MINUTE_SEC) {
       return `00:${padZero(totalSeconds)}`;
     }
 
-    if (totalSeconds < SECONDS_IN_ONE_HOUR) {
-      const minutes = padZero(totalSeconds / SECONDS_IN_ONE_MINUTE);
-      const seconds = padZero(restOfDivision(totalSeconds, SECONDS_IN_ONE_MINUTE));
+    if (totalSeconds < ONE_HOUR_SEC) {
+      const minutes = padZero(totalSeconds / ONE_MINUTE_SEC);
+      const seconds = padZero(restOfDivision(totalSeconds, ONE_MINUTE_SEC));
       return `${minutes}:${seconds}`;
     }
 
-    const hours = padZero(totalSeconds / SECONDS_IN_ONE_HOUR);
+    const hours = padZero(totalSeconds / ONE_HOUR_SEC);
     const minutes = padZero(
-      restOfDivision(totalSeconds, SECONDS_IN_ONE_HOUR) / SECONDS_IN_ONE_MINUTE,
+      restOfDivision(totalSeconds, ONE_HOUR_SEC) / ONE_MINUTE_SEC,
     );
-    const seconds = padZero(restOfDivision(totalSeconds, SECONDS_IN_ONE_MINUTE));
+    const seconds = padZero(restOfDivision(totalSeconds, ONE_MINUTE_SEC));
     return `${hours}:${minutes}:${seconds}`;
   }
 }

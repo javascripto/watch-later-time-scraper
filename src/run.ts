@@ -1,8 +1,8 @@
-import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
+import { chromium } from 'playwright';
 import { getPlaylistDurationFromLabels } from './core/index.js';
-import { scrapeWatchLaterLabels } from './scraper.js';
 import { formatDuration } from './formatter.js';
+import { scrapeWatchLaterLabels } from './scraper.js';
 
 const SESSION_PATH = 'session.json';
 const WATCH_LATER_URL = 'https://www.youtube.com/playlist?list=WL';
