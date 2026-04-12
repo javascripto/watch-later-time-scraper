@@ -8,7 +8,9 @@ const LOGGED_IN_SELECTOR = '#avatar-btn';
 const LOGIN_TIMEOUT_MS = 120_000; // 2 minutos para o usuário logar
 
 async function login(): Promise<void> {
-  const browser = await chromium.launch({ headless: false });
+  // Usa o Chrome real instalado no sistema para evitar bloqueio do Google
+  // (o Chromium bundled do Playwright é detectado como bot)
+  const browser = await chromium.launch({ headless: false, channel: 'chrome' });
   const context = await browser.newContext();
   const page = await context.newPage();
 
