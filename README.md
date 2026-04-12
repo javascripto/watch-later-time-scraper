@@ -2,7 +2,7 @@
 
 Automação de browser que calcula o **tempo total** da sua playlist Watch Later do YouTube e exporta os dados em Markdown e JSON.
 
-A API do YouTube não expõe a playlist Watch Later (ela é privada), então este projeto usa [Playwright](https://playwright.dev/) para abrir o browser, fazer scroll na página e extrair as durações diretamente do DOM.
+A API do YouTube não expõe o Watch Later (playlist privada), então este projeto usa [Playwright](https://playwright.dev/) para abrir o browser, fazer scroll na página e extrair as informações diretamente do DOM.
 
 ## Exemplo de saída
 
@@ -50,8 +50,7 @@ A API do YouTube não expõe a playlist Watch Later (ela é privada), então est
       "videoId": "ABC123",
       "duration": "15:35",
       "views": "5,5 mil visualizações",
-      "date": "há 1 dia",
-      "thumbnail": "https://i.ytimg.com/vi/ABC123/hqdefault.jpg"
+      "date": "há 1 dia"
     }
   ]
 }
@@ -66,8 +65,6 @@ A API do YouTube não expõe a playlist Watch Later (ela é privada), então est
 ## Instalação
 
 ```bash
-git clone https://github.com/seu-usuario/youtube-watch-later-duration
-cd youtube-watch-later-duration
 npm install
 npx playwright install chromium
 ```
@@ -102,14 +99,15 @@ npm run start -- --headed
 
 ```
 src/
-├── lib/                        # Utilitários de duração e geração de arquivos
-│   ├── duration.ts             # Classe Duration (parse e formatação)
+├── lib/
+│   ├── duration.ts             # Classe Duration: parse e formatação
 │   ├── labels.ts               # Filtra labels inválidas (ao vivo, estreia...)
 │   ├── playlist-duration.ts    # Soma duração de uma lista de labels
-│   ├── formatter.ts            # Formata Duration em HH:MM:SS e Xh Ymin
+│   ├── formatter.ts            # Formata em HH:MM:SS e Xh Ymin
 │   ├── generate-markdown.ts    # Gera watch-later.md
 │   ├── generate-json.ts        # Gera watch-later.json
-│   └── math.ts / constants.ts  # Helpers internos
+│   ├── math.ts                 # Helpers matemáticos
+│   └── constants.ts            # Constantes de tempo
 ├── scraper.ts                  # Extrai dados dos vídeos via Playwright
 ├── login.ts                    # Script de login manual
 ├── run.ts                      # Script principal
@@ -128,7 +126,7 @@ src/
 
 ## Arquivos gerados
 
-`watch-later.md` e `watch-later.json` estão no `.gitignore` — eles contêm dados pessoais da sua conta e não devem ser versionados.
+`watch-later.md`, `watch-later.json` e `session.json` estão no `.gitignore` — contêm dados pessoais da sua conta e não devem ser versionados.
 
 ## Testes
 
