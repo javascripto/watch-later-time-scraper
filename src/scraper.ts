@@ -14,6 +14,9 @@ const VIDEO_ITEM_SELECTOR = 'ytd-playlist-video-renderer';
 export async function scrapeWatchLaterLabels(page: Page): Promise<string[]> {
   let previousCount = 0;
 
+  // Aguarda o primeiro vídeo aparecer antes de começar o scroll
+  await page.waitForSelector(VIDEO_ITEM_SELECTOR, { timeout: 15_000 }).catch(() => {});
+
   // Scroll progressivo até não aparecerem novos vídeos
   while (true) {
     await page.evaluate(() =>
@@ -24,6 +27,7 @@ export async function scrapeWatchLaterLabels(page: Page): Promise<string[]> {
     await page.waitForTimeout(1500);
 
     const currentCount = await page.locator(VIDEO_ITEM_SELECTOR).count();
+    console.log(`  → ${currentCount} vídeos carregados...`);
 
     if (currentCount === previousCount) {
       break; // Chegou ao fim da lista
@@ -32,7 +36,23 @@ export async function scrapeWatchLaterLabels(page: Page): Promise<string[]> {
     previousCount = currentCount;
   }
 
-  const labels = await page.locator(DURATION_SELECTOR).allTextContents();
+  // Tenta o seletor principal, com fallback para variantes do YouTube
+  const selectors = [
+    'ytd-thumbnail-overlay-time-status-renderer .badge-shape-wiz__text',
+    'ytd-thumbnail-overlay-time-status-renderer span#text',
+    'ytd-thumbnail-overlay-time-status-renderer span',
+  ];
 
-  return labels.map((label) => label.trim()).filter(Boolean);
+  for (const selector of selectors) {
+    const labels = await page.locator(selector).allTextContents();
+    const filtered = labels.map((l) => l.trim()).filter(Boolean);
+
+    if (filtered.length > 0) {
+      console.log(`  → Seletor usado: "${selector}"`);
+      return filtered;
+    }
+  }
+
+  console.warn('  ⚠️  Nenhuma label de duração encontrada com os seletores conhecidos.');
+  return [];
 }
