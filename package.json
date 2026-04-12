@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "login": "tsx src/login.ts",
-    "start": "tsx src/export.ts",
+    "start": "tsx src/run.ts",
     "test": "vitest run"
   },
   "dependencies": {

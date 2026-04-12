@@ -1,8 +1,8 @@
-import { Duration } from './core/index.js';
+import { Duration } from './';
 
 export type FormattedDuration = {
-  clock: string;  // "123:59:59"
-  human: string;  // "123h 59min"
+  clock: string; // "123:59:59"
+  human: string; // "123h 59min"
 };
 
 export function formatDuration(duration: Duration): FormattedDuration {

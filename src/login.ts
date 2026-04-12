@@ -26,16 +26,16 @@ async function login(): Promise<void> {
 
   await page.goto(YOUTUBE_URL);
 
-  console.log('🔐 Faça login no YouTube na janela aberta.');
-  console.log('   Aguardando até 2 minutos...');
+  console.info('🔐 Faça login no YouTube na janela aberta.');
+  console.info('   Aguardando até 2 minutos...');
 
   await page.waitForSelector(LOGGED_IN_SELECTOR, {
     timeout: LOGIN_TIMEOUT_MS,
   });
 
   await context.storageState({ path: SESSION_PATH });
-  console.log('✅ Sessão salva com sucesso!');
-  console.log(`   Arquivo: ${SESSION_PATH}`);
+  console.info('✅ Sessão salva com sucesso!');
+  console.info(`   Arquivo: ${SESSION_PATH}`);
 
   await browser.close();
 }

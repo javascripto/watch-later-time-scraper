@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'vitest';
-import { Duration } from './core/index.js';
-import { formatDuration } from './formatter.js';
+import { describe, expect, test } from 'vitest';
+import { Duration } from './core/index';
+import { formatDuration } from './formatter';
 
 describe('formatDuration', () => {
   test('formata duração menor que 1 hora', () => {

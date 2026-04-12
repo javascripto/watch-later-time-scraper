@@ -1,8 +1,5 @@
 import type { Page } from 'playwright';
-import type { VideoInfo } from './types.js';
-
-const DURATION_SELECTOR =
-  'ytd-thumbnail-overlay-time-status-renderer .badge-shape-wiz__text';
+import type { VideoInfo } from './types';
 
 const VIDEO_ITEM_SELECTOR = 'ytd-playlist-video-renderer';
 
@@ -16,7 +13,9 @@ export async function scrapeWatchLaterLabels(page: Page): Promise<string[]> {
   let previousCount = 0;
 
   // Aguarda o primeiro vídeo aparecer antes de começar o scroll
-  await page.waitForSelector(VIDEO_ITEM_SELECTOR, { timeout: 15_000 }).catch(() => {});
+  await page
+    .waitForSelector(VIDEO_ITEM_SELECTOR, { timeout: 15_000 })
+    .catch(() => {});
 
   // Scroll progressivo até não aparecerem novos vídeos
   while (true) {
@@ -46,7 +45,7 @@ export async function scrapeWatchLaterLabels(page: Page): Promise<string[]> {
 
   for (const selector of selectors) {
     const labels = await page.locator(selector).allTextContents();
-    const filtered = labels.map((l) => l.trim()).filter(Boolean);
+    const filtered = labels.map(l => l.trim()).filter(Boolean);
 
     if (filtered.length > 0) {
       // console.info(`  → Seletor usado: "${selector}"`);
@@ -54,7 +53,9 @@ export async function scrapeWatchLaterLabels(page: Page): Promise<string[]> {
     }
   }
 
-  console.warn('  ⚠️  Nenhuma label de duração encontrada com os seletores conhecidos.');
+  console.warn(
+    '  ⚠️  Nenhuma label de duração encontrada com os seletores conhecidos.',
+  );
   return [];
 }
 
@@ -63,10 +64,12 @@ export async function scrapeWatchLaterLabels(page: Page): Promise<string[]> {
  * Faz o mesmo scroll progressivo e retorna VideoInfo[] com todos os metadados visíveis.
  */
 export async function scrapeWatchLaterVideos(page: Page): Promise<VideoInfo[]> {
-  let previousCount = 0;
+  let totalCount = 0;
 
   // Aguarda o primeiro vídeo aparecer antes de começar o scroll
-  await page.waitForSelector(VIDEO_ITEM_SELECTOR, { timeout: 15_000 }).catch(() => {});
+  await page
+    .waitForSelector(VIDEO_ITEM_SELECTOR, { timeout: 15_000 })
+    .catch(() => {});
 
   // Scroll progressivo para carregar todos os vídeos
   while (true) {
@@ -77,52 +80,56 @@ export async function scrapeWatchLaterVideos(page: Page): Promise<VideoInfo[]> {
     await page.waitForTimeout(1500);
 
     const currentCount = await page.locator(VIDEO_ITEM_SELECTOR).count();
-    console.info(`  → ${currentCount} vídeos carregados...`);
 
-    if (currentCount === previousCount) break;
-    previousCount = currentCount;
+    if (currentCount === totalCount) break;
+    totalCount = currentCount;
   }
 
+  console.info(`  → ${totalCount} vídeos carregados...`);
+
   // Extrai os dados de cada item via evaluate (mais eficiente que N locator calls)
-  const videos = await page.evaluate((videoSelector) => {
+  const videos = await page.evaluate(videoSelector => {
     const items = Array.from(document.querySelectorAll(videoSelector));
 
-    return items.map((item) => {
+    return items.map(item => {
       // Título e Video ID
       const titleEl = item.querySelector<HTMLAnchorElement>('a#video-title');
       const title = titleEl?.textContent?.trim() ?? '';
       const href = titleEl?.href ?? '';
-      const videoId = new URL(href, 'https://www.youtube.com').searchParams.get('v') ?? '';
+      const videoId =
+        new URL(href, 'https://www.youtube.com').searchParams.get('v') ?? '';
 
       // Canal e URL do canal
-      const channelEl = item.querySelector<HTMLElement>('ytd-channel-name yt-formatted-string');
+      const channelEl = item.querySelector<HTMLElement>(
+        'ytd-channel-name yt-formatted-string',
+      );
       const channel = channelEl?.textContent?.trim() ?? '';
-      const channelLinkEl = item.querySelector<HTMLAnchorElement>('ytd-channel-name a');
+      const channelLinkEl =
+        item.querySelector<HTMLAnchorElement>('ytd-channel-name a');
       const channelUrl = channelLinkEl?.href ?? '';
 
       // Duração
       const durationEl =
         item.querySelector<HTMLElement>('.badge-shape-wiz__text') ??
-        item.querySelector<HTMLElement>('ytd-thumbnail-overlay-time-status-renderer span#text') ??
-        item.querySelector<HTMLElement>('ytd-thumbnail-overlay-time-status-renderer span');
+        item.querySelector<HTMLElement>(
+          'ytd-thumbnail-overlay-time-status-renderer span#text',
+        ) ??
+        item.querySelector<HTMLElement>(
+          'ytd-thumbnail-overlay-time-status-renderer span',
+        );
       const duration = durationEl?.textContent?.trim() ?? '';
 
       // Views e Data (ficam nos spans de metadata)
       const metaSpans = Array.from(
-        item.querySelectorAll<HTMLElement>('#video-info span.inline-metadata-item'),
-      ).map((el) => el.textContent?.trim() ?? '');
+        item.querySelectorAll<HTMLElement>('#video-info span'),
+      ).map(el => el.textContent?.trim() ?? '');
 
       const views = metaSpans[0] ?? '';
-      const date = metaSpans[1] ?? '';
+      const date = metaSpans[2] ?? '';
 
-      // Thumbnail via Video ID
-      const thumbnail = videoId
-        ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
-        : '';
-
-      return { title, channel, channelUrl, videoId, duration, views, date, thumbnail };
+      return { title, channel, channelUrl, videoId, duration, views, date };
     });
   }, VIDEO_ITEM_SELECTOR);
 
-  return videos.filter((v) => v.videoId !== '');
+  return videos.filter(v => v.videoId !== '');
 }

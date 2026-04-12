@@ -1,13 +1,15 @@
-import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
-import { getPlaylistDurationFromLabels } from './core/index.js';
-import { scrapeWatchLaterVideos } from './scraper.js';
-import { formatDuration } from './formatter.js';
-import { generateMarkdown } from './markdown.js';
+import { chromium } from 'playwright';
+import { formatDuration } from './lib/formatter';
+import { generateJSON } from './lib/generate-json';
+import { generateMarkdown } from './lib/generate-markdown';
+import { getPlaylistDurationFromLabels } from './lib/index';
+import { scrapeWatchLaterVideos } from './scraper';
 
 const SESSION_PATH = 'session.json';
 const WATCH_LATER_URL = 'https://www.youtube.com/playlist?list=WL';
-const OUTPUT_PATH = 'watch-later.md';
+const MD_OUTPUT_PATH = 'watch-later.md';
+const JSON_OUTPUT_PATH = 'watch-later.json';
 
 async function main(): Promise<void> {
   if (!existsSync(SESSION_PATH)) {
@@ -33,7 +35,7 @@ async function main(): Promise<void> {
       process.exit(1);
     }
 
-    console.log('⏳ Carregando vídeos da playlist...');
+    console.info('⏳ Carregando vídeos da playlist...\n');
 
     const videos = await scrapeWatchLaterVideos(page);
 
@@ -42,16 +44,17 @@ async function main(): Promise<void> {
       process.exit(0);
     }
 
-    const durationLabels = videos.map((v) => v.duration);
+    const durationLabels = videos.map(v => v.duration);
     const duration = getPlaylistDurationFromLabels(durationLabels);
     const formatted = formatDuration(duration);
 
-    generateMarkdown(videos, formatted, OUTPUT_PATH);
+    generateMarkdown(videos, formatted, MD_OUTPUT_PATH);
+    generateJSON(videos, formatted, JSON_OUTPUT_PATH);
 
-    console.log(`\n🎬 Watch Later — ${videos.length} vídeos encontrados\n`);
-    console.log(`⏱  Watch Later: ${formatted.clock}`);
-    console.log(`⏱  Watch Later: ${formatted.human}`);
-    console.log(`\n📄 Salvo em: ${OUTPUT_PATH}`);
+    console.info(`\n🎬 Watch Later — ${videos.length} vídeos encontrados`);
+    console.info(`\n⏱️  ${formatted.clock} (${formatted.human})\n`);
+    console.info(`📄 Salvo em: ${MD_OUTPUT_PATH}`);
+    console.info(`📄 Salvo em: ${JSON_OUTPUT_PATH}`);
   } catch (err: unknown) {
     const error = err as Error;
     if (error.name === 'TimeoutError') {
