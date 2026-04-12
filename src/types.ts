@@ -1,6 +1,7 @@
 export type VideoInfo = {
   title: string;
   channel: string;
+  channelUrl: string;  // ex: "https://www.youtube.com/@CanalExemplo"
   videoId: string;
   duration: string;    // ex: "15:35"
   views: string;       // ex: "5,5 mil visualizações"

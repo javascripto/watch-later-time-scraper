@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
-import type { VideoInfo } from './types.js';
 import type { FormattedDuration } from './formatter.js';
+import type { VideoInfo } from './types.js';
 
 export function generateMarkdown(
   videos: VideoInfo[],
@@ -20,17 +20,17 @@ export function generateMarkdown(
 
   // Um bloco por vídeo
   for (const video of videos) {
-    lines.push(`## ${video.title}`);
+    const videoUrl = `https://www.youtube.com/watch?v=${video.videoId}`;
+    const channelLink = video.channelUrl
+      ? `[${video.channel}](${video.channelUrl})`
+      : video.channel;
+
+    lines.push(`[<img src="${video.thumbnail}" alt="thumbnail" width="180">](${videoUrl})`);
     lines.push('');
-    lines.push(`**Canal:** ${video.channel}`);
-    lines.push(`**Video ID:** ${video.videoId}`);
-    lines.push(`**Duração:** ${video.duration}`);
-    lines.push(`**Views:** ${video.views}`);
-    lines.push(`**Data:** ${video.date}`);
-    lines.push(`**Thumbnail:** ${video.thumbnail}`);
-    lines.push(`**Link:** https://www.youtube.com/watch?v=${video.videoId}`);
     lines.push('');
-    lines.push('---');
+    lines.push(`**${video.title}**`);
+    lines.push('');
+    lines.push(`Duração: ${video.duration} - Canal: ${channelLink}`);
     lines.push('');
   }
 

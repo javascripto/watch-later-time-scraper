@@ -94,9 +94,11 @@ export async function scrapeWatchLaterVideos(page: Page): Promise<VideoInfo[]> {
       const href = titleEl?.href ?? '';
       const videoId = new URL(href, 'https://www.youtube.com').searchParams.get('v') ?? '';
 
-      // Canal
+      // Canal e URL do canal
       const channelEl = item.querySelector<HTMLElement>('ytd-channel-name yt-formatted-string');
       const channel = channelEl?.textContent?.trim() ?? '';
+      const channelLinkEl = item.querySelector<HTMLAnchorElement>('ytd-channel-name a');
+      const channelUrl = channelLinkEl?.href ?? '';
 
       // Duração
       const durationEl =
@@ -118,7 +120,7 @@ export async function scrapeWatchLaterVideos(page: Page): Promise<VideoInfo[]> {
         ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
         : '';
 
-      return { title, channel, videoId, duration, views, date, thumbnail };
+      return { title, channel, channelUrl, videoId, duration, views, date, thumbnail };
     });
   }, VIDEO_ITEM_SELECTOR);
 
